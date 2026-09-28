@@ -1,0 +1,30 @@
+[Unit]
+Description=Arcus spot volume bot
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=arcus
+Group=arcus
+WorkingDirectory=/opt/arcus
+# Day boundaries and ACTIVE_HOURS use this time zone, regardless of the server's own.
+Environment=TZ=Asia/Ho_Chi_Minh
+Environment=NODE_ENV=production
+ExecStart=/opt/arcus/node_modules/.bin/tsx --env-file=.env src/volume-bot.ts
+
+# `systemctl stop` sends SIGTERM: the bot finishes any open buy+sell pair, then exits.
+KillSignal=SIGTERM
+TimeoutStopSec=180
+# Restart after crashes; a clean exit (every wallet hit its stop condition) stays stopped.
+Restart=on-failure
+RestartSec=30
+
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/opt/arcus/logs
+
+[Install]
+WantedBy=multi-user.target
