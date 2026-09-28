@@ -83,6 +83,21 @@ sudo systemctl enable --now arcus-bot
 
 `enable` starts the bot again after every reboot; `--now` also starts it immediately.
 
+## Variant: existing checkout as root with Node from nvm
+
+The production server (Ubuntu 24.04, ARM64) runs the bot as `root` from an existing clone at `/root/develop/arcus-trading`, with Node installed through nvm. systemd does not load nvm, so its unit points at the nvm Node binary directly and differs from `deploy/arcus-bot.service` only in these lines:
+
+```ini
+[Service]
+WorkingDirectory=/root/develop/arcus-trading
+Environment=PATH=/root/.nvm/versions/node/v26.3.1/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+ExecStart=/root/.nvm/versions/node/v26.3.1/bin/node /root/develop/arcus-trading/node_modules/tsx/dist/cli.mjs --env-file=.env src/volume-bot.ts
+ProtectHome=read-only
+ReadWritePaths=/root/develop/arcus-trading/logs
+```
+
+(no `User=`/`Group=` lines). The installed copy lives at `/etc/systemd/system/arcus-bot.service`. After a Node upgrade through nvm, update both version paths, then `systemctl daemon-reload` and restart. Updating code there is `git pull && npm ci` in the checkout instead of rsync.
+
 ## Day-to-day operations
 
 | Task | Command |
