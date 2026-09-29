@@ -11,4 +11,4 @@ npm run bot                 # run the bot
 npm test                    # scheduling tests
 ```
 
-Running it continuously on a server: [docs/deployment.md](docs/deployment.md).
+Running it continuously on an Ubuntu server: `sudo ./deploy.sh` (see [docs/deployment.md](docs/deployment.md)).

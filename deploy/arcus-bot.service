@@ -1,3 +1,4 @@
+# Template rendered by deploy.sh; @PLACEHOLDERS@ are filled in for the target server.
 [Unit]
 Description=Arcus spot volume bot
 After=network-online.target
@@ -5,13 +6,15 @@ Wants=network-online.target
 
 [Service]
 Type=simple
-User=arcus
-Group=arcus
-WorkingDirectory=/opt/arcus
+User=@USER@
+Group=@GROUP@
+WorkingDirectory=@APP_DIR@
 # Day boundaries and ACTIVE_HOURS use this time zone, regardless of the server's own.
-Environment=TZ=Asia/Ho_Chi_Minh
+Environment=TZ=@TZ@
 Environment=NODE_ENV=production
-ExecStart=/opt/arcus/node_modules/.bin/tsx --env-file=.env src/volume-bot.ts
+# systemd does not load nvm or shell profiles, so Node is referenced by absolute path.
+Environment=PATH=@NODE_DIR@:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+ExecStart=@NODE_DIR@/node @APP_DIR@/node_modules/tsx/dist/cli.mjs --env-file=.env src/volume-bot.ts
 
 # `systemctl stop` sends SIGTERM: the bot finishes any open buy+sell pair, then exits.
 KillSignal=SIGTERM
@@ -23,8 +26,8 @@ RestartSec=30
 NoNewPrivileges=true
 PrivateTmp=true
 ProtectSystem=strict
-ProtectHome=true
-ReadWritePaths=/opt/arcus/logs
+ProtectHome=@PROTECT_HOME@
+ReadWritePaths=@APP_DIR@/logs
 
 [Install]
 WantedBy=multi-user.target
